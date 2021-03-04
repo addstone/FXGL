@@ -69,7 +69,7 @@ Make sure to set `<release>11</release>` for `maven-compiler-plugin`.
 <dependency>
     <groupId>com.github.almasb</groupId>
     <artifactId>fxgl</artifactId>
-    <version>11.13</version>
+    <version>11.14</version>
 </dependency>
 ```
 
@@ -87,7 +87,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.almasb:fxgl:11.13'
+    compile 'com.github.almasb:fxgl:11.14'
 }
 ```
 
@@ -116,6 +116,7 @@ Download the latest uber jar from [Releases](https://github.com/AlmasB/FXGL/rele
 * Conant High School, USA
 * Zealand Institute of Business and Technology, Denmark
 * Federal Institute of Education, Science and Technology of Rio Grande do Sul, Brazil
+* FHNW School of Engineering / Computer Science, Switzerland
 
 If your institution wants to use or is using FXGL, add a note in the [Chat](https://gitter.im/AlmasB/FXGL) to be added to the list.
 
