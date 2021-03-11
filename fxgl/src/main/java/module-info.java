@@ -11,7 +11,6 @@ module com.almasb.fxgl.all {
     requires transitive com.almasb.fxgl.core;
     requires transitive com.almasb.fxgl.achievement;
     requires transitive com.almasb.fxgl.ai;
-    requires transitive com.almasb.fxgl.animation;
     requires transitive com.almasb.fxgl.cutscene;
     requires transitive com.almasb.fxgl.effects;
     requires transitive com.almasb.fxgl.entity;
@@ -24,7 +23,6 @@ module com.almasb.fxgl.all {
     requires transitive com.almasb.fxgl.net;
     requires transitive com.almasb.fxgl.profiles;
     requires transitive com.almasb.fxgl.scene;
-    requires transitive com.almasb.fxgl.time;
     requires transitive com.almasb.fxgl.trade;
     requires transitive com.almasb.fxgl.ui;
 

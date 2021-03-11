@@ -204,12 +204,6 @@
 
         <dependency>
             <groupId>com.github.almasb</groupId>
-            <artifactId>fxgl-animation</artifactId>
-            <version>${fxgl.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.github.almasb</groupId>
             <artifactId>fxgl-entity</artifactId>
             <version>${fxgl.version}</version>
         </dependency>
@@ -259,12 +253,6 @@
         <dependency>
             <groupId>com.github.almasb</groupId>
             <artifactId>fxgl-localization</artifactId>
-            <version>${fxgl.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.github.almasb</groupId>
-            <artifactId>fxgl-time</artifactId>
             <version>${fxgl.version}</version>
         </dependency>
 
