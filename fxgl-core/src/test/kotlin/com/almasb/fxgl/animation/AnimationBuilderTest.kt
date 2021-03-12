@@ -6,9 +6,11 @@
 @file:Suppress("JAVA_MODULE_DOES_NOT_DEPEND_ON_MODULE")
 package com.almasb.fxgl.animation
 
-import com.almasb.fxgl.entity.Entity
-import com.almasb.fxgl.scene.Scene
+import com.almasb.fxgl.core.Updatable
+import com.almasb.fxgl.core.UpdatableRunner
 import com.almasb.fxgl.test.RunWithFX
+import javafx.beans.property.DoubleProperty
+import javafx.beans.property.SimpleDoubleProperty
 import javafx.geometry.Point2D
 import javafx.geometry.Point3D
 import javafx.scene.Node
@@ -29,6 +31,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.function.Consumer
 import java.util.stream.Stream
 
@@ -38,17 +41,17 @@ import java.util.stream.Stream
 @ExtendWith(RunWithFX::class)
 class AnimationBuilderTest {
 
-    private lateinit var scene: Scene
+    private lateinit var scene: UpdatableRunner
     private lateinit var builder: AnimationBuilder
-    private lateinit var e: Entity
+    private lateinit var e: MockEntity
     private lateinit var node: Node
 
     @BeforeEach
     fun setUp() {
-        scene = object : Scene() {}
+        scene = makeRunner()
         builder = AnimationBuilder(scene)
 
-        e = Entity()
+        e = MockEntity()
         node = Rectangle()
     }
 
@@ -389,8 +392,8 @@ class AnimationBuilderTest {
 
         anim.start()
 
-        assertThat(e.transformComponent.rotationOrigin.x, `is`(1.0))
-        assertThat(e.transformComponent.rotationOrigin.y, `is`(5.0))
+        assertThat(e.rotationOriginValue.x, `is`(1.0))
+        assertThat(e.rotationOriginValue.y, `is`(5.0))
 
         assertThat(e.rotation, `is`(0.0))
 
@@ -409,16 +412,16 @@ class AnimationBuilderTest {
 
         anim.start()
 
-        assertThat(e.transformComponent.rotationX, `is`(0.0))
-        assertThat(e.transformComponent.rotationY, `is`(2.0))
-        assertThat(e.transformComponent.rotationZ, `is`(4.0))
+        assertThat(e.rotationX, `is`(0.0))
+        assertThat(e.rotationY, `is`(2.0))
+        assertThat(e.rotationZ, `is`(4.0))
 
         anim.onUpdate(0.5)
         anim.onUpdate(0.5)
 
-        assertThat(e.transformComponent.rotationX, `is`(4.0))
-        assertThat(e.transformComponent.rotationY, `is`(5.0))
-        assertThat(e.transformComponent.rotationZ, `is`(-2.0))
+        assertThat(e.rotationX, `is`(4.0))
+        assertThat(e.rotationY, `is`(5.0))
+        assertThat(e.rotationZ, `is`(-2.0))
     }
 
     @Test
@@ -448,7 +451,7 @@ class AnimationBuilderTest {
 
         // use 2nd builder, the transforms should remain
 
-        val anim2 = AnimationBuilder(object : Scene() {})
+        val anim2 = AnimationBuilder(makeRunner())
                 .rotate(node)
                 .from(Point3D(10.0, 12.0, 14.0))
                 .to(Point3D(14.0, 15.0, -12.0))
@@ -586,8 +589,8 @@ class AnimationBuilderTest {
 
         anim.start()
 
-        assertThat(e.transformComponent.scaleOrigin.x, `is`(3.0))
-        assertThat(e.transformComponent.scaleOrigin.y, `is`(5.0))
+        assertThat(e.scaleOriginValue.x, `is`(3.0))
+        assertThat(e.scaleOriginValue.y, `is`(5.0))
 
         assertThat(e.scaleX, `is`(1.0))
         assertThat(e.scaleY, `is`(1.0))
@@ -755,7 +758,7 @@ class AnimationBuilderTest {
 
     @Test
     fun `Build and play`() {
-        val scene = object : Scene() { }
+        val scene = makeRunner()
 
         builder.translate(node)
                 .from(Point2D(10.0, 10.0))
@@ -882,6 +885,81 @@ class AnimationBuilderTest {
 
         assertThat(node.translateX, `is`(0.0))
         assertThat(node.translateY, `is`(not(0.0)))
+    }
+
+    private fun makeRunner(): MockRunner = MockRunner()
+
+    private class MockRunner : UpdatableRunner {
+        private val listeners = CopyOnWriteArrayList<Updatable>()
+
+        override fun addListener(updatable: Updatable) {
+            listeners += updatable
+        }
+
+        override fun removeListener(updatable: Updatable) {
+            listeners -= updatable
+        }
+
+        fun update(tpf: Double) {
+            listeners.forEach { it.onUpdate(tpf) }
+        }
+    }
+
+    private class MockEntity : Animatable {
+        private val propX = SimpleDoubleProperty()
+        private val propY = SimpleDoubleProperty()
+        private val propZ = SimpleDoubleProperty()
+
+        private val propRotX = SimpleDoubleProperty()
+        private val propRotY = SimpleDoubleProperty()
+        private val propRotZ = SimpleDoubleProperty()
+
+        private val propScaleX = SimpleDoubleProperty()
+        private val propScaleY = SimpleDoubleProperty()
+        private val propScaleZ = SimpleDoubleProperty()
+
+        private val propOpacity = SimpleDoubleProperty()
+
+        var scaleOriginValue: Point2D = Point2D.ZERO
+        var rotationOriginValue: Point2D = Point2D.ZERO
+
+        val x get() = propX.value
+        val y get() = propY.value
+        val z get() = propZ.value
+
+        val rotation get() = propRotZ.value
+
+        val rotationX get() = propRotX.value
+        val rotationY get() = propRotY.value
+        val rotationZ get() = propRotZ.value
+
+        val scaleX get() = propScaleX.value
+        val scaleY get() = propScaleY.value
+        val scaleZ get() = propScaleZ.value
+
+        val opacity get() = propOpacity.value
+
+        override fun xProperty(): DoubleProperty = propX
+        override fun yProperty(): DoubleProperty = propY
+        override fun zProperty(): DoubleProperty = propZ
+
+        override fun scaleXProperty(): DoubleProperty = propScaleX
+        override fun scaleYProperty(): DoubleProperty = propScaleY
+        override fun scaleZProperty(): DoubleProperty = propScaleZ
+
+        override fun rotationXProperty(): DoubleProperty = propRotX
+        override fun rotationYProperty(): DoubleProperty = propRotY
+        override fun rotationZProperty(): DoubleProperty = propRotZ
+
+        override fun opacityProperty(): DoubleProperty = propOpacity
+
+        override fun setScaleOrigin(pivotPoint: Point2D) {
+            scaleOriginValue = pivotPoint
+        }
+
+        override fun setRotationOrigin(pivotPoint: Point2D) {
+            rotationOriginValue = pivotPoint
+        }
     }
 
     companion object {
